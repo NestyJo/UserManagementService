@@ -1,0 +1,48 @@
+package com.uhuru.userservice.utility;
+
+
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.google.gson.Gson;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+
+@Service
+public class
+UtilityService {
+
+
+    private final DateUtility dateUtility;
+    private final Gson jsonProcessor;
+    private final HttpService httpService;
+    private final StringUtility stringUtility;
+
+    private static final String JSON_FILE_PATH = "data.json";
+
+    public UtilityService( DateUtility dateUtility, Gson jsonProcessor, HttpService httpService, StringUtility stringUtility) {
+        this.dateUtility = dateUtility;
+        this.jsonProcessor = jsonProcessor;
+        this.httpService = httpService;
+        this.stringUtility = stringUtility;
+    }
+
+    public JsonMapper jsonMapper() {
+        JsonMapper jsonMapper = new JsonMapper();
+        jsonMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+        return jsonMapper;
+    }
+
+    public String generateUniqueId() {
+        return dateUtility.generateTimePrefix() + stringUtility.randomString();
+    }
+
+    public String cleanAccount(String acc) {
+        if (StringUtils.substring(acc, 2, 3).equals("1")) {
+            String start = StringUtils.substring(acc, 0, 2);
+            String end = StringUtils.substring(acc, 3);
+            return start + "J" + end;
+        }
+        return acc;
+    }
+}
