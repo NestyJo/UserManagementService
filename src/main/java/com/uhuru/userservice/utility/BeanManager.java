@@ -18,4 +18,6 @@ public class BeanManager {
     public RestTemplate restTemplateBean(){
         return new RestTemplate();
     }
+
+
 }
