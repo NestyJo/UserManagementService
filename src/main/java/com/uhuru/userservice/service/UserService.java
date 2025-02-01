@@ -79,15 +79,29 @@ public class UserService implements UserInterface {
     }
 
     @Override
-    public ResponseEntity<ApiResponse<Object>> deleteUser(Long userId) {
-        return null;
+    public ResponseEntity<ApiResponse<List<UserDetails>>> searchUsers(String firstName, String lastName, String email) {
+        try {
+            if ((firstName == null || firstName.trim().isEmpty()) && (lastName == null || lastName.trim().isEmpty()) && (email == null || email.trim().isEmpty())) {
+                ResponseUtil.error("At least one search parameter is required", HttpStatus.BAD_REQUEST);
+            }
+            List<UserDetails> users = databaseRepository.getUserDetailsRepository().findByFirstNameContainingAndLastNameContainingAndEmailContaining(firstName != null ? firstName : "", lastName != null ? lastName : "", email != null ? email : "");
+
+            if (users.isEmpty()) {
+                return ResponseUtil.error("No users found", HttpStatus.NOT_FOUND);
+            }
+
+            return ResponseUtil.success(true, "Users retrieved successfully", users);
+
+        } catch (Exception e) {
+            loggerService.log("Failed to retrieve User: {}", e.getMessage());
+            return ResponseUtil.error("Failed to retrieve users: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Override
-    public ResponseEntity<ApiResponse<List<UserDetails>>> searchUsers(String firstName, String lastName, String email) {
+    public ResponseEntity<ApiResponse<Object>> deleteUser(Long userId) {
         return null;
     }
-
 
     private UserDetails createUserPayload(UserDtoRequest request) {
         UserDetails userDetails = new UserDetails();
