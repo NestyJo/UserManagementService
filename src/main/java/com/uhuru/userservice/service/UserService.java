@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -28,7 +29,7 @@ public class UserService implements UserInterface {
     }
 
     @Override
-    public ResponseEntity<ApiResponse<Object>> createUser(@Valid UserDtoRequest user) {
+    public ResponseEntity<ApiResponse<Object>> createUser(UserDtoRequest user) {
         try {
             Optional<UserDetails> isUserExists = databaseRepository.userDetailsRepository.findByEmail(user.getEmail());
             if (isUserExists.isPresent()) {
@@ -47,6 +48,39 @@ public class UserService implements UserInterface {
         }
     }
 
+    @Override
+    public ResponseEntity<ApiResponse<List<UserDetails>>> getAllUsers() {
+        try {
+            List<UserDetails> users = databaseRepository.userDetailsRepository.findAll();
+            loggerService.log("Retrieved users: {}", String.valueOf(users.size()));
+            return ResponseUtil.success(true, "Users retrieved successfully", users);
+
+        } catch (Exception e) {
+            loggerService.log("Failed to retrieve User: {}", e.getMessage());
+            return ResponseUtil.error("Failed to retrieve users: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Override
+    public ResponseEntity<ApiResponse<UserDetails>> getUserById(Long userId) {
+        return null;
+    }
+
+    @Override
+    public ResponseEntity<ApiResponse<Object>> updateUser(Long userId, UserDtoRequest request) {
+        return null;
+    }
+
+    @Override
+    public ResponseEntity<ApiResponse<Object>> deleteUser(Long userId) {
+        return null;
+    }
+
+    @Override
+    public ResponseEntity<ApiResponse<List<UserDetails>>> searchUsers(String firstName, String lastName, String email) {
+        return null;
+    }
+
 
     private UserDetails createUserPayload(UserDtoRequest request) {
         UserDetails userDetails = new UserDetails();
@@ -63,7 +97,6 @@ public class UserService implements UserInterface {
 
         return userDetails;
     }
-
 
     private String generateInitials(String firstName, String middleName, String lastName) {
         StringBuilder initials = new StringBuilder();
@@ -85,5 +118,4 @@ public class UserService implements UserInterface {
     private String generateUserNo(String Initials) {
         return utilityService.getStringUtility().generateId(Initials);
     }
-
 }
