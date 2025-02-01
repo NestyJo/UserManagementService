@@ -20,8 +20,6 @@ public class Role {
     @Column(unique = true, nullable = false)
     private String name;
 
-    @ManyToMany(mappedBy = "roles")
-    private Set<UserDetails> users;
 
     public Long getId() {
         return id;
@@ -37,13 +35,5 @@ public class Role {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Set<UserDetails> getUsers() {
-        return users;
-    }
-
-    public void setUsers(Set<UserDetails> users) {
-        this.users = users;
     }
 }

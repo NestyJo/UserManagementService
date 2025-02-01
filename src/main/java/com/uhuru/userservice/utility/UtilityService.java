@@ -26,6 +26,22 @@ UtilityService {
         this.stringUtility = stringUtility;
     }
 
+    public DateUtility getDateUtility() {
+        return dateUtility;
+    }
+
+    public Gson getJsonProcessor() {
+        return jsonProcessor;
+    }
+
+    public HttpService getHttpService() {
+        return httpService;
+    }
+
+    public StringUtility getStringUtility() {
+        return stringUtility;
+    }
+
     public JsonMapper jsonMapper() {
         JsonMapper jsonMapper = new JsonMapper();
         jsonMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -37,12 +53,4 @@ UtilityService {
         return dateUtility.generateTimePrefix() + stringUtility.randomString();
     }
 
-    public String cleanAccount(String acc) {
-        if (StringUtils.substring(acc, 2, 3).equals("1")) {
-            String start = StringUtils.substring(acc, 0, 2);
-            String end = StringUtils.substring(acc, 3);
-            return start + "J" + end;
-        }
-        return acc;
-    }
 }

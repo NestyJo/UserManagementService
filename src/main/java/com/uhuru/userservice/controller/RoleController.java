@@ -1,7 +1,5 @@
 package com.uhuru.userservice.controller;
 
-
-import com.uhuru.userservice.configuration.database.entities.Role;
 import com.uhuru.userservice.data.ApiResponse;
 import com.uhuru.userservice.data.request.RoleDto;
 import com.uhuru.userservice.data.response.RoleResponse;

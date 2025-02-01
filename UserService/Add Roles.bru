@@ -6,6 +6,12 @@ meta {
 
 post {
   url: http://localhost:9090/api/v1.1/role
-  body: none
+  body: json
   auth: none
+}
+
+body:json {
+  {
+    "roleName":"Operator"
+  }
 }

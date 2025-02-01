@@ -1,21 +1,24 @@
 package com.uhuru.userservice.utility;
 
 
+import com.uhuru.userservice.data.ApiResponse;
+import com.uhuru.userservice.data.ValidationErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @ControllerAdvice
-@RestController
 public class GlobalExceptionHandler {
 
-    // Handle NullPointerException
+
     @ExceptionHandler(NullPointerException.class)
     public ResponseEntity<Map<String, Object>> handleNullPointerException(NullPointerException ex) {
         Map<String, Object> response = new HashMap<>();
@@ -25,7 +28,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
-    // Handle IllegalArgumentException
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, Object>> handleIllegalArgumentException(IllegalArgumentException ex) {
         Map<String, Object> response = new HashMap<>();
@@ -35,19 +38,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
-    // Handle MethodArgumentNotValidException (e.g., validation errors)
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidationException(MethodArgumentNotValidException ex) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", false);
-        response.put("message", "Validation failed.");
-        ex.getBindingResult().getFieldErrors().forEach(error -> {
-            response.put(error.getField(), error.getDefaultMessage());
-        });
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-    }
 
-    // Handle generic exceptions
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
         Map<String, Object> response = new HashMap<>();
@@ -72,4 +63,17 @@ public class GlobalExceptionHandler {
         response.put("message", ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
     }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiResponse<List<ValidationErrorResponse>>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        List<ValidationErrorResponse> errors = new ArrayList<>();
+
+        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
+            errors.add(new ValidationErrorResponse(error.getField(), error.getDefaultMessage()));
+        }
+
+        ApiResponse<List<ValidationErrorResponse>> response = new ApiResponse<>(false, "Validation failed", errors);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
 }

@@ -1,0 +1,23 @@
+meta {
+  name: Add User
+  type: http
+  seq: 4
+}
+
+post {
+  url: http://localhost:9090/api/v1.1/user
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "firstName": "john",
+    "middleName": "Michael",
+    "lastName": "Doe",
+    "dob": "1990-01-01",
+    "address": "123 Main St, Springfield, IL",
+    "gender": "MALE",
+    "email": "john.doe@example.com"
+  }
+}
