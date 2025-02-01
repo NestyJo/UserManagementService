@@ -1,22 +1,21 @@
 package com.uhuru.userservice.data;
 
-
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ValidationErrorResponse {
-    private String field;
-    private String message;
+    private final String field;
+    private final String message;
 
-
-    public ValidationErrorResponse(String field, String message) {
+    public ValidationErrorResponse(@JsonProperty("field") String field, @JsonProperty("message") String message) {
         this.field = field;
         this.message = message;
     }
 
-    public void setField(String field) {
-        this.field = field;
+    public String getField() {
+        return field;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public String getMessage() {
+        return message;
     }
 }
