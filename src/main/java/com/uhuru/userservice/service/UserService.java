@@ -63,7 +63,14 @@ public class UserService implements UserInterface {
 
     @Override
     public ResponseEntity<ApiResponse<UserDetails>> getUserById(Long userId) {
-        return null;
+        Optional<UserDetails> userOptional = databaseRepository.userDetailsRepository.findById(userId);
+        if (userOptional.isPresent()) {
+
+            UserDetails user = userOptional.get();
+            return ResponseUtil.success(true, "User retrieved successfully", user);
+        } else {
+            return ResponseUtil.error("User not found with ID:" + userId, HttpStatus.NOT_FOUND);
+        }
     }
 
     @Override
