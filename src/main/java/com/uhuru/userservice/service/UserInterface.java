@@ -18,4 +18,6 @@ public interface UserInterface {
     ResponseEntity<ApiResponse<Object>> deleteUser(Long userId);
 
     ResponseEntity<ApiResponse<List<UserDetails>>> searchUsers(String firstName, String lastName, String email);
+
+    ResponseEntity<ApiResponse<Object>> enableUser(Long userId);
 }

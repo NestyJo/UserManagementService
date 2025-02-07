@@ -38,18 +38,20 @@ public class UserController {
         return userInterface.getUserById(userId);
     }
 
+    @PostMapping("enable/{userId}")
+    public ResponseEntity<ApiResponse<Object>> enableUser(@PathVariable Long userId) {
+        return userInterface.enableUser(userId);
+    }
 
     @PutMapping("/{userId}")
     public ResponseEntity<ApiResponse<Object>> updateUser(@PathVariable Long userId, @Valid @RequestBody UserDtoRequest request) {
         return userInterface.updateUser(userId, request);
     }
 
-
     @DeleteMapping("/{userId}")
     public ResponseEntity<ApiResponse<Object>> deleteUser(@PathVariable Long userId) {
         return userInterface.deleteUser(userId);
     }
-
 
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<List<UserDetails>>> searchUsers(@RequestParam(required = false) String firstName, @RequestParam(required = false) String lastName, @RequestParam(required = false) String email) {
