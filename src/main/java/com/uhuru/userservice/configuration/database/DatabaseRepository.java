@@ -4,7 +4,6 @@ package com.uhuru.userservice.configuration.database;
 import com.uhuru.userservice.configuration.database.repository.RoleRepository;
 import com.uhuru.userservice.configuration.database.repository.UserAccessRepository;
 import com.uhuru.userservice.configuration.database.repository.UserDetailsRepository;
-import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

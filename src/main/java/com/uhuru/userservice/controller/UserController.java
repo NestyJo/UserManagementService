@@ -40,9 +40,7 @@ public class UserController {
 
 
     @PutMapping("/{userId}")
-    public ResponseEntity<ApiResponse<Object>> updateUser(
-            @PathVariable Long userId,
-            @Valid @RequestBody UserDtoRequest request) {
+    public ResponseEntity<ApiResponse<Object>> updateUser(@PathVariable Long userId, @Valid @RequestBody UserDtoRequest request) {
         return userInterface.updateUser(userId, request);
     }
 
@@ -54,10 +52,7 @@ public class UserController {
 
 
     @GetMapping("/search")
-    public ResponseEntity<ApiResponse<List<UserDetails>>> searchUsers(
-            @RequestParam(required = false) String firstName,
-            @RequestParam(required = false) String lastName,
-            @RequestParam(required = false) String email) {
+    public ResponseEntity<ApiResponse<List<UserDetails>>> searchUsers(@RequestParam(required = false) String firstName, @RequestParam(required = false) String lastName, @RequestParam(required = false) String email) {
         return userInterface.searchUsers(firstName, lastName, email);
     }
 }

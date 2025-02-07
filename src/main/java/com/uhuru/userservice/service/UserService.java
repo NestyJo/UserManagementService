@@ -2,15 +2,18 @@ package com.uhuru.userservice.service;
 
 
 import com.uhuru.userservice.configuration.database.DatabaseRepository;
+import com.uhuru.userservice.configuration.database.entities.UserAccess;
 import com.uhuru.userservice.configuration.database.entities.UserDetails;
 import com.uhuru.userservice.data.ApiResponse;
 import com.uhuru.userservice.data.request.UserDtoRequest;
 import com.uhuru.userservice.utility.LoggerService;
 import com.uhuru.userservice.utility.ResponseUtil;
 import com.uhuru.userservice.utility.UtilityService;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,6 +24,7 @@ public class UserService implements UserInterface {
     private final DatabaseRepository databaseRepository;
     private final UtilityService utilityService;
     private final LoggerService loggerService;
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public UserService(DatabaseRepository databaseRepository, UtilityService utilityService, LoggerService loggerService) {
         this.databaseRepository = databaseRepository;
@@ -29,6 +33,7 @@ public class UserService implements UserInterface {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<ApiResponse<Object>> createUser(UserDtoRequest user) {
         try {
             Optional<UserDetails> isUserExists = databaseRepository.userDetailsRepository.findByEmail(user.getEmail());
@@ -40,7 +45,17 @@ public class UserService implements UserInterface {
             databaseRepository.userDetailsRepository.save(details);
 
             loggerService.log("User created successfully: {}", details.getEmail());
-            return ResponseUtil.success(true, "user created", details);
+
+
+            if (checkIfUserExits(details.getId())) {
+                UserAccess access = createUserAccessPayload(details);
+
+                databaseRepository.userAccessRepository.save(access);
+
+                return ResponseUtil.success(true, "user created", details);
+            }
+
+            return ResponseUtil.success(true, "user created and Not created to access table", details);
 
         } catch (Exception e) {
             loggerService.log("Failed to create user: {}", e.getMessage());
@@ -103,6 +118,32 @@ public class UserService implements UserInterface {
         return null;
     }
 
+    private boolean checkIfUserExits(Long userId) {
+        loggerService.log("Here is user Id we a looking for {}: " + userId);
+        Optional<UserDetails> isUserExists = databaseRepository.userDetailsRepository.findById(userId);
+        return isUserExists.isPresent();
+    }
+
+    private UserAccess createUserAccessPayload(UserDetails userDetails) {
+
+        String password = changeAfirstLetterCapitalAndTheRestToSmall(userDetails.getLastName());
+        loggerService.log(password, "password: {}");
+
+        String hashedPassword = hashPassword(password);
+        loggerService.log(hashedPassword, "password: {}");
+
+        UserAccess userAccess = new UserAccess();
+        userAccess.setUserDetails(userDetails);
+        userAccess.setUsername(userDetails.getUserNo());
+        userAccess.setPassword(hashedPassword);
+        userAccess.setEnabled(false);
+        userAccess.setLastLogin(null);
+        userAccess.setSessionTime(null);
+        userAccess.setOneTimePassword(null);
+
+        return userAccess;
+    }
+
     private UserDetails createUserPayload(UserDtoRequest request) {
         UserDetails userDetails = new UserDetails();
 
@@ -138,5 +179,13 @@ public class UserService implements UserInterface {
 
     private String generateUserNo(String Initials) {
         return utilityService.getStringUtility().generateId(Initials);
+    }
+
+    private String hashPassword(String plainPassword) {
+        return passwordEncoder.encode(plainPassword);
+    }
+
+    private String changeAfirstLetterCapitalAndTheRestToSmall(String defaultPassword) {
+        return defaultPassword.substring(0, 1).toUpperCase() + defaultPassword.substring(1).toLowerCase();
     }
 }

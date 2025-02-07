@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public  class RoleService implements RoleInterface {
+public class RoleService implements RoleInterface {
 
     private final DatabaseRepository databaseRepository;
     private final UtilityService utilityService;
