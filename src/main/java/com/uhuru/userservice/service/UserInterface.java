@@ -20,4 +20,8 @@ public interface UserInterface {
     ResponseEntity<ApiResponse<List<UserDetails>>> searchUsers(String firstName, String lastName, String email);
 
     ResponseEntity<ApiResponse<Object>> enableUser(Long userId);
+
+    ResponseEntity<ApiResponse<Object>> disableUser(Long userId);
+
+
 }

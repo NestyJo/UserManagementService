@@ -20,4 +20,9 @@ public interface UserDetailsRepository extends JpaRepository<UserDetails, Long>{
     @Transactional
     @Query("UPDATE UserDetails u SET u.enableTo = TRUE WHERE u.id = :userId")
     int enableUser(@Param("userId") Long userId);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE UserDetails u SET u.enableTo = FALSE WHERE u.id = :userId")
+    int disableUser(@Param("userId") Long userId);
 }

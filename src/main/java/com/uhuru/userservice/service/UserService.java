@@ -124,6 +124,20 @@ public class UserService implements UserInterface {
         return ResponseUtil.success(true, "User is enabled", "");
     }
 
+
+    @Transactional
+    public ResponseEntity<ApiResponse<Object>> disableUser(Long userId) {
+        if (!checkIfUserExits(userId)) {
+            return ResponseUtil.error("User not found with ID: " + userId, HttpStatus.NOT_FOUND);
+        }
+
+        if (!disableUserUpdate(userId)) {
+            return ResponseUtil.error("Failed to disable user. Please try again.", HttpStatus.CONFLICT);
+        }
+
+        return ResponseUtil.success(true, "User has been Disabled", "");
+    }
+
     @Override
     public ResponseEntity<ApiResponse<Object>> deleteUser(Long userId) {
         return null;
@@ -201,6 +215,11 @@ public class UserService implements UserInterface {
     }
 
     private boolean enableUserUpdate(Long id) {
+        int updatedRows = databaseRepository.getUserDetailsRepository().enableUser(id);
+        return updatedRows > 0;
+    }
+
+    private boolean disableUserUpdate(Long id) {
         int updatedRows = databaseRepository.getUserDetailsRepository().enableUser(id);
         return updatedRows > 0;
     }

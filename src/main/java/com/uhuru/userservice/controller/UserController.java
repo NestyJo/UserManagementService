@@ -43,6 +43,11 @@ public class UserController {
         return userInterface.enableUser(userId);
     }
 
+    @PostMapping("disable/{userId}")
+    public ResponseEntity<ApiResponse<Object>> disable(@PathVariable Long userId) {
+        return userInterface.disableUser(userId);
+    }
+
     @PutMapping("/{userId}")
     public ResponseEntity<ApiResponse<Object>> updateUser(@PathVariable Long userId, @Valid @RequestBody UserDtoRequest request) {
         return userInterface.updateUser(userId, request);
