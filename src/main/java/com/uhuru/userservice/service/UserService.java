@@ -35,32 +35,29 @@ public class UserService implements UserInterface {
     @Override
     @Transactional
     public ResponseEntity<ApiResponse<Object>> createUser(UserDtoRequest user) {
-        try {
-            Optional<UserDetails> isUserExists = databaseRepository.userDetailsRepository.findByEmail(user.getEmail());
-            if (isUserExists.isPresent()) {
-                return ResponseUtil.error("User with the same email already exists", HttpStatus.CONFLICT);
-            }
-
-            UserDetails details = createUserPayload(user);
-            databaseRepository.userDetailsRepository.save(details);
-
-            loggerService.log("User created successfully: {}", details.getEmail());
-
-
-            if (checkIfUserExits(details.getId())) {
-                UserAccess access = createUserAccessPayload(details);
-
-                databaseRepository.userAccessRepository.save(access);
-
-                return ResponseUtil.success(true, "user created", details);
-            }
-
-            return ResponseUtil.success(true, "user created and Not created to access table", details);
-
-        } catch (Exception e) {
-            loggerService.log("Failed to create user: {}", e.getMessage());
-            return ResponseUtil.error("Failed to create role: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        Optional<UserDetails> isUserExists = databaseRepository.userDetailsRepository.findByEmail(user.getEmail());
+        if (isUserExists.isPresent()) {
+            loggerService.log("User creation failed: Email {} already exists", user.getEmail());
+            return ResponseUtil.error("User with the same email already exists", HttpStatus.CONFLICT);
         }
+
+
+        UserDetails details = createUserPayload(user);
+        databaseRepository.userDetailsRepository.save(details);
+        databaseRepository.userDetailsRepository.flush();
+
+        loggerService.log("User created successfully: {}", details.getEmail());
+
+
+        if (checkIfUserExits(details.getId())) {
+            UserAccess access = createUserAccessPayload(details);
+            databaseRepository.userAccessRepository.save(access);
+            loggerService.log("User access created for user: {}", details.getEmail());
+            return ResponseUtil.success(true, "User created successfully", details);
+        }
+
+        loggerService.log("User created but not added to access table: {}", details.getEmail());
+        return ResponseUtil.success(true, "User created but access not assigned", details);
     }
 
     @Override
