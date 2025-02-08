@@ -5,9 +5,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 public class ResponseUtil {
-    public static <T> ResponseEntity<ApiResponse<T>> success( boolean success, String message,T data) {
+
+    public static <T> ResponseEntity<ApiResponse<T>> success(boolean success, String message, T data, HttpStatus status) {
         ApiResponse<T> response = new ApiResponse<>(success, message, data);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return new ResponseEntity<>(response, status);
+    }
+
+    public static <T> ResponseEntity<ApiResponse<T>> success(boolean success, String message, T data) {
+        return success(success, message, data, HttpStatus.OK);
     }
 
     public static <T>  ResponseEntity<ApiResponse<T>> error(String message, HttpStatus status){

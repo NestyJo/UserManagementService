@@ -10,7 +10,6 @@ import com.uhuru.userservice.utility.LoggerService;
 import com.uhuru.userservice.utility.ResponseUtil;
 import com.uhuru.userservice.utility.UtilityService;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -123,7 +122,6 @@ public class UserService implements UserInterface {
 
         return ResponseUtil.success(true, "User is enabled", "");
     }
-
 
     @Transactional
     public ResponseEntity<ApiResponse<Object>> disableUser(Long userId) {
