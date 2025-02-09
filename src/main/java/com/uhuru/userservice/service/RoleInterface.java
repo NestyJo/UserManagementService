@@ -19,4 +19,6 @@ public interface RoleInterface {
     ResponseEntity<ApiResponse<Object>> updateRole(Long id, RoleDto roleDetails);
 
     ResponseEntity<ApiResponse<Object>> deleteRole(Long id);
+
+    ResponseEntity<ApiResponse<Object>> getPermissionsForRole(String roleName);
 }

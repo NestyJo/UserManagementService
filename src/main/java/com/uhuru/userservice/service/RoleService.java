@@ -2,6 +2,7 @@ package com.uhuru.userservice.service;
 
 
 import com.uhuru.userservice.configuration.database.DatabaseRepository;
+import com.uhuru.userservice.configuration.database.entities.Permission;
 import com.uhuru.userservice.configuration.database.entities.Role;
 import com.uhuru.userservice.data.ApiResponse;
 import com.uhuru.userservice.data.request.RoleDto;
@@ -13,10 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class RoleService implements RoleInterface {
@@ -47,6 +46,7 @@ public class RoleService implements RoleInterface {
             RoleResponse roleResponse = new RoleResponse();
             roleResponse.setRoleId(createdRole.getId());
             roleResponse.setRoleName(createdRole.getName());
+            roleResponse.setDescription(createdRole.getDescription());
 
             return ResponseUtil.success(true, "Role created successfully", roleResponse);
         } catch (Exception e) {
@@ -65,6 +65,7 @@ public class RoleService implements RoleInterface {
                 RoleResponse roleResponse = new RoleResponse();
                 roleResponse.setRoleId(role.getId());
                 roleResponse.setRoleName(role.getName());
+                roleResponse.setDescription(role.getDescription());
                 roleResponses.add(roleResponse);
             }
 
@@ -106,5 +107,25 @@ public class RoleService implements RoleInterface {
         } catch (Exception e) {
             return ResponseUtil.error("Failed to delete role: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @Override
+    public ResponseEntity<ApiResponse<Object>> getPermissionsForRole(String roleName) {
+        try {
+            Optional<Role> roleOptional = Optional.ofNullable(databaseRepository.getRoleRepository().findByName(roleName));
+
+            if (roleOptional.isEmpty()) {
+                return ResponseUtil.error("Role with the name '" + roleName + "' does not exist", HttpStatus.NOT_FOUND);
+            }
+
+            Role role = roleOptional.get();
+
+            Set<String> permissions = role.getPermissions().stream().map(Permission::getPermissionName).collect(Collectors.toSet());
+
+            return ResponseUtil.success(true, "Permissions retrieved successfully", permissions);
+        } catch (Exception e) {
+            return ResponseUtil.error("An error occurred while retrieving permissions: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
     }
 }

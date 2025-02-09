@@ -45,4 +45,9 @@ public class RoleController {
     public ResponseEntity<ApiResponse<Object>> deleteRole(@PathVariable Long id) {
         return roleInterface.deleteRole(id);
     }
+
+    @GetMapping("/{roleName}/permissions")
+    public ResponseEntity<ApiResponse<Object>> getRolePermissions(@PathVariable String roleName) {
+        return roleInterface.getPermissionsForRole(roleName);
+    }
 }
