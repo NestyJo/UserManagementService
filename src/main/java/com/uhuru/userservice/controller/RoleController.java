@@ -50,4 +50,14 @@ public class RoleController {
     public ResponseEntity<ApiResponse<Object>> getRolePermissions(@PathVariable String roleName) {
         return roleInterface.getPermissionsForRole(roleName);
     }
+
+    @PostMapping("/{roleName}/permissions")
+    public ResponseEntity<ApiResponse<Object>> addPermissionsToRole(@PathVariable String roleName, @RequestBody List<String> permissionNames) {
+        return roleInterface.addPermissionsToRole(roleName, permissionNames);
+    }
+
+    @DeleteMapping("/{roleName}/permissions")
+    public ResponseEntity<ApiResponse<Object>> removePermissionsFromRole(@PathVariable String roleName, @RequestBody List<String> permissionNames) {
+        return roleInterface.removePermissionsFromRole(roleName, permissionNames);
+    }
 }

@@ -126,6 +126,50 @@ public class RoleService implements RoleInterface {
         } catch (Exception e) {
             return ResponseUtil.error("An error occurred while retrieving permissions: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+    @Override
+    public ResponseEntity<ApiResponse<Object>> addPermissionsToRole(String roleName, List<String> permissionNames) {
+        return modifyRolePermissions(roleName, permissionNames, true);
+    }
 
+    @Override
+    public ResponseEntity<ApiResponse<Object>> removePermissionsFromRole(String roleName, List<String> permissionNames) {
+        return modifyRolePermissions(roleName, permissionNames, false);
+    }
+
+    private ResponseEntity<ApiResponse<Object>> modifyRolePermissions(String roleName, List<String> permissionNames, boolean isAddOperation) {
+        try {
+            Optional<Role> roleOptional = Optional.ofNullable(databaseRepository.getRoleRepository().findByName(roleName));
+
+            if (roleOptional.isEmpty()) {
+                return ResponseUtil.error("Role with the name '" + roleName + "' does not exist", HttpStatus.NOT_FOUND);
+            }
+
+            Role role = roleOptional.get();
+            Set<Permission> permissionsToModify = new HashSet<>();
+
+            for (String permissionName : permissionNames) {
+                Permission permission = databaseRepository.getPermissionRepository().findByPermissionName(permissionName);
+                if (permission != null) {
+                    permissionsToModify.add(permission);
+                } else {
+                    return ResponseUtil.error("Permission with the name '" + permissionName + "' does not exist", HttpStatus.NOT_FOUND);
+                }
+            }
+
+            if (isAddOperation) {
+                role.getPermissions().addAll(permissionsToModify);
+            } else {
+                role.getPermissions().removeAll(permissionsToModify);
+            }
+
+            databaseRepository.getRoleRepository().save(role);
+
+            String operation = isAddOperation ? "added to" : "removed from";
+            return ResponseUtil.success(true, "Permissions " + operation + " role successfully", null);
+
+        } catch (Exception e) {
+            return ResponseUtil.error("An error occurred while modifying permissions for role: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

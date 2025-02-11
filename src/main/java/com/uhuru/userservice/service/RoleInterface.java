@@ -21,4 +21,8 @@ public interface RoleInterface {
     ResponseEntity<ApiResponse<Object>> deleteRole(Long id);
 
     ResponseEntity<ApiResponse<Object>> getPermissionsForRole(String roleName);
+
+    ResponseEntity<ApiResponse<Object>> addPermissionsToRole(String roleName, List<String> permissionsNames);
+
+    ResponseEntity<ApiResponse<Object>> removePermissionsFromRole(String roleName, List<String> permissionsNames);
 }
