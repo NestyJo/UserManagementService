@@ -4,6 +4,7 @@ package com.uhuru.userservice.service;
 import com.uhuru.userservice.configuration.database.DatabaseRepository;
 import com.uhuru.userservice.configuration.database.entities.Permission;
 import com.uhuru.userservice.data.ApiResponse;
+import com.uhuru.userservice.data.response.PermissionResponse;
 import com.uhuru.userservice.utility.ResponseUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,10 +44,7 @@ public class PermissionService implements PermissionInterface {
     @Override
     public ResponseEntity<ApiResponse<Object>> getAllPermissions() {
         try {
-            List<String> permissions = databaseRepository.getPermissionRepository().findAll()
-                    .stream()
-                    .map(Permission::getPermissionName)
-                    .collect(Collectors.toList());
+            List<PermissionResponse> permissions = databaseRepository.getPermissionRepository().findAll().stream().map(permission -> new PermissionResponse(permission.getId(), permission.getPermissionName(), permission.getDescription())).collect(Collectors.toList());
 
             return ResponseUtil.success(true, "Permissions retrieved successfully", permissions);
         } catch (Exception e) {

@@ -2,8 +2,7 @@ package com.uhuru.userservice.service;
 
 
 import com.uhuru.userservice.configuration.database.DatabaseRepository;
-import com.uhuru.userservice.configuration.database.entities.UserAccess;
-import com.uhuru.userservice.configuration.database.entities.UserDetails;
+import com.uhuru.userservice.configuration.database.entities.*;
 import com.uhuru.userservice.data.ApiResponse;
 import com.uhuru.userservice.data.request.UserDtoRequest;
 import com.uhuru.userservice.utility.LoggerService;
@@ -40,18 +39,24 @@ public class UserService implements UserInterface {
             return ResponseUtil.error("User with the same email already exists", HttpStatus.CONFLICT);
         }
 
-
         UserDetails details = createUserPayload(user);
+
         databaseRepository.userDetailsRepository.save(details);
         databaseRepository.userDetailsRepository.flush();
 
-        loggerService.log("User created successfully: {}", details.getEmail());
+        Optional<Role> defaultRole = Optional.ofNullable(databaseRepository.roleRepository.findByName("User"));
+        if (defaultRole.isEmpty()) {
+            loggerService.log("Default role not found");
+            return ResponseUtil.error("Default role not found", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
 
+        // UserRoleId userRoleId = new UserRoleId(details.getId(), defaultRole.get().getId());
+//        UserRole userRole = new UserRole(details, defaultRole.get());
+//        databaseRepository.userRoleRepository.save(userRole);
 
         if (checkIfUserExits(details.getId())) {
             UserAccess access = createUserAccessPayload(details);
             databaseRepository.userAccessRepository.save(access);
-            loggerService.log("User access created for user: {}", details.getEmail());
             return ResponseUtil.success(true, "User created successfully", details);
         }
 

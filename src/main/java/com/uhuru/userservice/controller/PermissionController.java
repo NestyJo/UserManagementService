@@ -2,7 +2,9 @@ package com.uhuru.userservice.controller;
 
 
 import com.uhuru.userservice.data.ApiResponse;
+import com.uhuru.userservice.data.request.PermissionRequest;
 import com.uhuru.userservice.service.PermissionInterface;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,19 +20,18 @@ public class PermissionController {
         this.permissionInterface = permissionInterface;
     }
 
-
     @GetMapping
     public ResponseEntity<ApiResponse<Object>> getAllPermissions() {
         return permissionInterface.getAllPermissions();
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<Object>> addPermission(@RequestParam String permissionName, @RequestParam String description) {
-        return permissionInterface.addPermission(permissionName, description);
+    public ResponseEntity<ApiResponse<Object>> addPermission(@Valid @RequestBody PermissionRequest permissionRequest) {
+        return permissionInterface.addPermission(permissionRequest.getPermissionName(), permissionRequest.getDescription());
     }
 
     @PutMapping("/{permissionId}")
-    public ResponseEntity<ApiResponse<Object>> editPermission(@PathVariable Long permissionId, @RequestParam String newPermissionName, @RequestParam String newDescription) {
-        return permissionInterface.editPermission(permissionId, newPermissionName, newDescription);
+    public ResponseEntity<ApiResponse<Object>> editPermission(@PathVariable Long permissionId, @Valid @RequestBody PermissionRequest permissionRequest) {
+        return permissionInterface.editPermission(permissionId, permissionRequest.getPermissionName(), permissionRequest.getDescription());
     }
 }
