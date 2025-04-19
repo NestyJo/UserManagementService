@@ -8,38 +8,50 @@ import java.util.Objects;
 @Embeddable
 public class UserRoleId  implements java.io.Serializable {
 
-    private Long user;
-    private Long role;
+    @Column(name = "user_id")
+    private Long userId;
+
+    @Column(name = "role_id")
+    private Long roleId;
 
     public UserRoleId() {
+        // Default constructor required by JPA
     }
 
-    public Long getUser() {
-        return user;
+    public UserRoleId(Long userId, Long roleId) {
+        this.userId = userId;
+        this.roleId = roleId;
     }
 
-    public void setUser(Long user) {
-        this.user = user;
+    // Getters and Setters (can also use Lombok @Getter @Setter)
+    public Long getUserId() {
+        return userId;
     }
 
-    public Long getRole() {
-        return role;
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
-    public void setRole(Long role) {
-        this.role = role;
+    public Long getRoleId() {
+        return roleId;
     }
+
+    public void setRoleId(Long roleId) {
+        this.roleId = roleId;
+    }
+
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof UserRoleId)) return false;
         UserRoleId that = (UserRoleId) o;
-        return Objects.equals(user, that.user) && Objects.equals(role, that.role);
+        return Objects.equals(userId, that.userId) &&
+                Objects.equals(roleId, that.roleId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(user, role);
+        return Objects.hash(userId, roleId);
     }
 }

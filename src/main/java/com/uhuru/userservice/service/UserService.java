@@ -40,9 +40,8 @@ public class UserService implements UserInterface {
         }
 
         UserDetails details = createUserPayload(user);
+        databaseRepository.userDetailsRepository.saveAndFlush(details);
 
-        databaseRepository.userDetailsRepository.save(details);
-        databaseRepository.userDetailsRepository.flush();
 
         Optional<Role> defaultRole = Optional.ofNullable(databaseRepository.roleRepository.findByName("User"));
         if (defaultRole.isEmpty()) {
@@ -50,9 +49,16 @@ public class UserService implements UserInterface {
             return ResponseUtil.error("Default role not found", HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        // UserRoleId userRoleId = new UserRoleId(details.getId(), defaultRole.get().getId());
-//        UserRole userRole = new UserRole(details, defaultRole.get());
-//        databaseRepository.userRoleRepository.save(userRole);
+
+        try {
+            UserRole userRole = new UserRole(details, defaultRole.get());
+            databaseRepository.userRoleRepository.save(userRole);
+        } catch (Exception e) {
+            loggerService.log("Error assigning default role to user: {}", e.getMessage());
+            return ResponseUtil.error("Failed to assign default role to user", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+
 
         if (checkIfUserExits(details.getId())) {
             UserAccess access = createUserAccessPayload(details);
@@ -154,7 +160,7 @@ public class UserService implements UserInterface {
 
     private UserAccess createUserAccessPayload(UserDetails userDetails) {
 
-        String password = changeAfirstLetterCapitalAndTheRestToSmall(userDetails.getLastName());
+        String password = changeAFirstLetterCapitalAndTheRestToSmall(userDetails.getLastName());
         loggerService.log(password, "password: {}");
 
         String hashedPassword = hashPassword(password);
@@ -213,7 +219,7 @@ public class UserService implements UserInterface {
         return passwordEncoder.encode(plainPassword);
     }
 
-    private String changeAfirstLetterCapitalAndTheRestToSmall(String defaultPassword) {
+    private String changeAFirstLetterCapitalAndTheRestToSmall(String defaultPassword) {
         return defaultPassword.substring(0, 1).toUpperCase() + defaultPassword.substring(1).toLowerCase();
     }
 
