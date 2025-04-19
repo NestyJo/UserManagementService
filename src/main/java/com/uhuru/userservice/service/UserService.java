@@ -59,7 +59,6 @@ public class UserService implements UserInterface {
         }
 
 
-
         if (checkIfUserExits(details.getId())) {
             UserAccess access = createUserAccessPayload(details);
             databaseRepository.userAccessRepository.save(access);

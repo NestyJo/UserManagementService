@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
 @Entity
-@NoArgsConstructor
 @AllArgsConstructor
 public class UserRole {
 
@@ -30,5 +29,30 @@ public class UserRole {
         this.userDetails = userDetails;
         this.role = role;
         this.userRoleId = new UserRoleId(userDetails.getId(), role.getId());
+    }
+
+
+    public UserRoleId getUserRoleId() {
+        return userRoleId;
+    }
+
+    public void setUserRoleId(UserRoleId userRoleId) {
+        this.userRoleId = userRoleId;
+    }
+
+    public UserDetails getUserDetails() {
+        return userDetails;
+    }
+
+    public void setUserDetails(UserDetails userDetails) {
+        this.userDetails = userDetails;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
     }
 }

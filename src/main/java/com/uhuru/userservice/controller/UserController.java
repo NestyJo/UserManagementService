@@ -3,6 +3,7 @@ package com.uhuru.userservice.controller;
 import com.uhuru.userservice.configuration.database.entities.UserDetails;
 import com.uhuru.userservice.data.ApiResponse;
 import com.uhuru.userservice.data.request.UserDtoRequest;
+import com.uhuru.userservice.service.RoleInterface;
 import com.uhuru.userservice.service.UserInterface;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -18,9 +19,12 @@ import java.util.List;
 @Validated
 public class UserController {
     private final UserInterface userInterface;
+    private final RoleInterface roleInterface;
 
-    public UserController(UserInterface userInterface) {
+
+    public UserController(UserInterface userInterface, RoleInterface roleInterface) {
         this.userInterface = userInterface;
+        this.roleInterface = roleInterface;
     }
 
     @PostMapping
@@ -36,6 +40,11 @@ public class UserController {
     @GetMapping("/{userId}")
     public ResponseEntity<ApiResponse<UserDetails>> getUserById(@PathVariable Long userId) {
         return userInterface.getUserById(userId);
+    }
+
+    @GetMapping("/{userId}/permissions")
+    public ResponseEntity<ApiResponse<Object>> getUserPermissionsById(@PathVariable Long userId) {
+        return roleInterface.getUserPermissionByRole(userId.toString());
     }
 
     @PostMapping("enable/{userId}")
