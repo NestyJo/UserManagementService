@@ -1,6 +1,5 @@
 package com.uhuru.userservice.service;
 
-
 import com.uhuru.userservice.configuration.database.DatabaseRepository;
 import com.uhuru.userservice.configuration.database.entities.*;
 import com.uhuru.userservice.data.ApiResponse;

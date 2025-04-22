@@ -4,6 +4,7 @@ package com.uhuru.userservice.service;
 import com.uhuru.userservice.configuration.database.DatabaseRepository;
 import com.uhuru.userservice.configuration.database.entities.Permission;
 import com.uhuru.userservice.configuration.database.entities.Role;
+import com.uhuru.userservice.configuration.database.entities.UserDetails;
 import com.uhuru.userservice.configuration.database.entities.UserRole;
 import com.uhuru.userservice.data.ApiResponse;
 import com.uhuru.userservice.data.request.RoleDto;
@@ -153,6 +154,21 @@ public class RoleService implements RoleInterface {
             return ResponseUtil.success(true, "User permissions retrieved successfully", permissions);
         } catch (Exception e) {
             return ResponseUtil.error("An error occurred while retrieving permissions: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Override
+    public ResponseEntity<ApiResponse<Object>> removeRoleFromUser(Long userId, Long roleId) {
+        Optional<UserDetails> userOptional = databaseRepository.userDetailsRepository.findById(userId);
+        if (userOptional.isEmpty()) {
+            return ResponseUtil.error("User not found with ID:" + userId, HttpStatus.NOT_FOUND);
+        }
+        try {
+            databaseRepository.userRoleRepository.deleteByUserDetailsIdAndRoleId(userId, roleId);
+            return ResponseUtil.success(true, "Role removed from user successfully", null);
+        } catch (Exception e) {
+
+            return ResponseUtil.error("Failed to remove role please try Again", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
