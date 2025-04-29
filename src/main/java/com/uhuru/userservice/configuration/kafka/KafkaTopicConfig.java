@@ -24,8 +24,8 @@ public class KafkaTopicConfig {
     @Bean
     public KafkaAdmin.NewTopics topics() {
         return new KafkaAdmin.NewTopics(
-                TopicBuilder.name("email-notification").partitions(1).replicas(1).build()
-//                TopicBuilder.name("microservice-events").partitions(1).replicas(1).build()
+                TopicBuilder.name("user-created-events").partitions(1).replicas(1).build(),
+                TopicBuilder.name("microservice-events").partitions(1).replicas(1).build()
         );
     }
 }

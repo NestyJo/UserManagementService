@@ -3,7 +3,9 @@ package com.uhuru.userservice.service;
 import com.uhuru.userservice.configuration.database.DatabaseRepository;
 import com.uhuru.userservice.configuration.database.entities.*;
 import com.uhuru.userservice.data.ApiResponse;
+import com.uhuru.userservice.data.kafkaRequest.UserCreatedEvent;
 import com.uhuru.userservice.data.request.UserDtoRequest;
+import com.uhuru.userservice.service.kafkaService.UserCreatedEventsService;
 import com.uhuru.userservice.utility.LoggerService;
 import com.uhuru.userservice.utility.ResponseUtil;
 import com.uhuru.userservice.utility.UtilityService;
@@ -19,14 +21,18 @@ import java.util.Optional;
 @Service
 public class UserService implements UserInterface {
     private final DatabaseRepository databaseRepository;
+    private final UserCreatedEventsService userCreatedEvents;
     private final UtilityService utilityService;
     private final LoggerService loggerService;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final UserCreatedEventsService userCreatedEventsService;
 
-    public UserService(DatabaseRepository databaseRepository, UtilityService utilityService, LoggerService loggerService) {
+    public UserService(DatabaseRepository databaseRepository, UserCreatedEventsService userCreatedEvents, UtilityService utilityService, LoggerService loggerService, UserCreatedEventsService userCreatedEventsService) {
         this.databaseRepository = databaseRepository;
+        this.userCreatedEvents = userCreatedEvents;
         this.utilityService = utilityService;
         this.loggerService = loggerService;
+        this.userCreatedEventsService = userCreatedEventsService;
     }
 
     @Override
@@ -229,5 +235,23 @@ public class UserService implements UserInterface {
     private boolean disableUserUpdate(Long id) {
         int updatedRows = databaseRepository.getUserDetailsRepository().enableUser(id);
         return updatedRows > 0;
+    }
+
+    private void publishUserCreatedEvent(UserDetails details) {
+        Optional<UserAccess> optionalUser = databaseRepository.userAccessRepository.findByUsername(details.getUserNo());
+
+        if (optionalUser.isEmpty()) {
+            loggerService.log("User with username {} not found in repository", details.getUserNo());
+            return;
+        }
+
+        UserAccess user = optionalUser.get();
+        kafkaRequest.UserCreatedEvent event = kafkaRequest.UserCreatedEvent.newBuilder()
+                .setUserNumber(details.getUserNo())
+                .setFullName(String.format("%s %s %s", details.getFirstName(), details.getMiddleName(), details.getLastName()))
+                .setHashedPassword(user.getPassword())
+                .setActionDetails("Created-user-event")
+                .build();
+        userCreatedEventsService.sendUserCreatedEvent(event);
     }
 }

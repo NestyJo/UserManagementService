@@ -1,0 +1,11 @@
+{
+  "type": "record",
+  "name": "UserCreatedEvent",
+  "namespace": "com.uhuru.userservice.data.kafkaRequest",
+  "fields": [
+    { "name": "fullName", "type": "string" },
+    { "name": "hashedPassword", "type": "string" },
+    { "name": "userNumber", "type": "string" },
+    { "name": "actionDetails", "type": "string" }
+  ]
+}
