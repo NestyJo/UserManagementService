@@ -246,7 +246,7 @@ public class UserService implements UserInterface {
         }
 
         UserAccess user = optionalUser.get();
-        kafkaRequest.UserCreatedEvent event = kafkaRequest.UserCreatedEvent.newBuilder()
+        UserCreatedEvent event = UserCreatedEvent.newBuilder()
                 .setUserNumber(details.getUserNo())
                 .setFullName(String.format("%s %s %s", details.getFirstName(), details.getMiddleName(), details.getLastName()))
                 .setHashedPassword(user.getPassword())
