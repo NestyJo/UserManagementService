@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 
 @Entity
@@ -47,6 +49,8 @@ public class UserDetails {
 
     @Column(nullable = false, columnDefinition = "boolean default false")
     private boolean isEmailVerified = false;
+
+
 
 
     public Long getId() {

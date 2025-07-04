@@ -4,7 +4,7 @@ import com.uhuru.userservice.data.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-public class ResponseUtil {
+public class    ResponseUtil {
 
     public static <T> ResponseEntity<ApiResponse<T>> success(boolean success, String message, T data, HttpStatus status) {
         ApiResponse<T> response = new ApiResponse<>(success, message, data);

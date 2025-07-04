@@ -4,6 +4,8 @@ package com.uhuru.userservice.service;
 import com.uhuru.userservice.configuration.database.DatabaseRepository;
 import com.uhuru.userservice.configuration.database.entities.Permission;
 import com.uhuru.userservice.configuration.database.entities.Role;
+import com.uhuru.userservice.configuration.database.entities.UserDetails;
+import com.uhuru.userservice.configuration.database.entities.UserRole;
 import com.uhuru.userservice.data.ApiResponse;
 import com.uhuru.userservice.data.request.RoleDto;
 import com.uhuru.userservice.data.response.RoleResponse;
@@ -127,6 +129,7 @@ public class RoleService implements RoleInterface {
             return ResponseUtil.error("An error occurred while retrieving permissions: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
     @Override
     public ResponseEntity<ApiResponse<Object>> addPermissionsToRole(String roleName, List<String> permissionNames) {
         return modifyRolePermissions(roleName, permissionNames, true);
@@ -135,6 +138,38 @@ public class RoleService implements RoleInterface {
     @Override
     public ResponseEntity<ApiResponse<Object>> removePermissionsFromRole(String roleName, List<String> permissionNames) {
         return modifyRolePermissions(roleName, permissionNames, false);
+    }
+
+    @Override
+    public ResponseEntity<ApiResponse<Object>> getUserPermissionByRole(String userId) {
+        try {
+            List<UserRole> userRoles = databaseRepository.getUserRoleRepository().findAllByUserDetailsId(Long.valueOf(userId));
+
+            if (userRoles.isEmpty()) {
+                return ResponseUtil.error("User has no roles assigned", HttpStatus.NOT_FOUND);
+            }
+
+            Set<String> permissions = userRoles.stream().map(UserRole::getRole).filter(Objects::nonNull).flatMap(role -> role.getPermissions().stream()).map(Permission::getPermissionName).collect(Collectors.toSet());
+
+            return ResponseUtil.success(true, "User permissions retrieved successfully", permissions);
+        } catch (Exception e) {
+            return ResponseUtil.error("An error occurred while retrieving permissions: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Override
+    public ResponseEntity<ApiResponse<Object>> removeRoleFromUser(Long userId, Long roleId) {
+        Optional<UserDetails> userOptional = databaseRepository.userDetailsRepository.findById(userId);
+        if (userOptional.isEmpty()) {
+            return ResponseUtil.error("User not found with ID:" + userId, HttpStatus.NOT_FOUND);
+        }
+        try {
+            databaseRepository.userRoleRepository.deleteByUserDetailsIdAndRoleId(userId, roleId);
+            return ResponseUtil.success(true, "Role removed from user successfully", null);
+        } catch (Exception e) {
+
+            return ResponseUtil.error("Failed to remove role please try Again", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     private ResponseEntity<ApiResponse<Object>> modifyRolePermissions(String roleName, List<String> permissionNames, boolean isAddOperation) {

@@ -26,6 +26,11 @@ public class RoleController {
         return roleInterface.createRole(role);
     }
 
+    @PostMapping("/{id}/User/{userId}")
+    public ResponseEntity<ApiResponse<Object>> unassignUserRole(@PathVariable Long id, @PathVariable Long userId){
+        return roleInterface.removeRoleFromUser(userId,id);
+    }
+
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponse<List<RoleResponse>>> getAllRoles() {
         return roleInterface.getAllRoles();

@@ -1,11 +1,11 @@
 package com.uhuru.userservice.service;
 
-
 import com.uhuru.userservice.configuration.database.DatabaseRepository;
-import com.uhuru.userservice.configuration.database.entities.UserAccess;
-import com.uhuru.userservice.configuration.database.entities.UserDetails;
+import com.uhuru.userservice.configuration.database.entities.*;
 import com.uhuru.userservice.data.ApiResponse;
+import com.uhuru.userservice.data.kafkaRequest.UserCreatedEvent;
 import com.uhuru.userservice.data.request.UserDtoRequest;
+import com.uhuru.userservice.service.kafkaService.UserCreatedEventsService;
 import com.uhuru.userservice.utility.LoggerService;
 import com.uhuru.userservice.utility.ResponseUtil;
 import com.uhuru.userservice.utility.UtilityService;
@@ -21,14 +21,18 @@ import java.util.Optional;
 @Service
 public class UserService implements UserInterface {
     private final DatabaseRepository databaseRepository;
+    private final UserCreatedEventsService userCreatedEvents;
     private final UtilityService utilityService;
     private final LoggerService loggerService;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final UserCreatedEventsService userCreatedEventsService;
 
-    public UserService(DatabaseRepository databaseRepository, UtilityService utilityService, LoggerService loggerService) {
+    public UserService(DatabaseRepository databaseRepository, UserCreatedEventsService userCreatedEvents, UtilityService utilityService, LoggerService loggerService, UserCreatedEventsService userCreatedEventsService) {
         this.databaseRepository = databaseRepository;
+        this.userCreatedEvents = userCreatedEvents;
         this.utilityService = utilityService;
         this.loggerService = loggerService;
+        this.userCreatedEventsService = userCreatedEventsService;
     }
 
     @Override
@@ -40,18 +44,29 @@ public class UserService implements UserInterface {
             return ResponseUtil.error("User with the same email already exists", HttpStatus.CONFLICT);
         }
 
-
         UserDetails details = createUserPayload(user);
-        databaseRepository.userDetailsRepository.save(details);
-        databaseRepository.userDetailsRepository.flush();
+        databaseRepository.userDetailsRepository.saveAndFlush(details);
 
-        loggerService.log("User created successfully: {}", details.getEmail());
+
+        Optional<Role> defaultRole = Optional.ofNullable(databaseRepository.roleRepository.findByName("User"));
+        if (defaultRole.isEmpty()) {
+            loggerService.log("Default role not found");
+            return ResponseUtil.error("Default role not found", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+
+        try {
+            UserRole userRole = new UserRole(details, defaultRole.get());
+            databaseRepository.userRoleRepository.save(userRole);
+        } catch (Exception e) {
+            loggerService.log("Error assigning default role to user: {}", e.getMessage());
+            return ResponseUtil.error("Failed to assign default role to user", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
 
 
         if (checkIfUserExits(details.getId())) {
             UserAccess access = createUserAccessPayload(details);
             databaseRepository.userAccessRepository.save(access);
-            loggerService.log("User access created for user: {}", details.getEmail());
             return ResponseUtil.success(true, "User created successfully", details);
         }
 
@@ -149,7 +164,7 @@ public class UserService implements UserInterface {
 
     private UserAccess createUserAccessPayload(UserDetails userDetails) {
 
-        String password = changeAfirstLetterCapitalAndTheRestToSmall(userDetails.getLastName());
+        String password = changeAFirstLetterCapitalAndTheRestToSmall(userDetails.getLastName());
         loggerService.log(password, "password: {}");
 
         String hashedPassword = hashPassword(password);
@@ -208,7 +223,7 @@ public class UserService implements UserInterface {
         return passwordEncoder.encode(plainPassword);
     }
 
-    private String changeAfirstLetterCapitalAndTheRestToSmall(String defaultPassword) {
+    private String changeAFirstLetterCapitalAndTheRestToSmall(String defaultPassword) {
         return defaultPassword.substring(0, 1).toUpperCase() + defaultPassword.substring(1).toLowerCase();
     }
 
@@ -220,5 +235,23 @@ public class UserService implements UserInterface {
     private boolean disableUserUpdate(Long id) {
         int updatedRows = databaseRepository.getUserDetailsRepository().enableUser(id);
         return updatedRows > 0;
+    }
+
+    private void publishUserCreatedEvent(UserDetails details) {
+        Optional<UserAccess> optionalUser = databaseRepository.userAccessRepository.findByUsername(details.getUserNo());
+
+        if (optionalUser.isEmpty()) {
+            loggerService.log("User with username {} not found in repository", details.getUserNo());
+            return;
+        }
+
+        UserAccess user = optionalUser.get();
+        UserCreatedEvent event = UserCreatedEvent.newBuilder()
+                .setUserNumber(details.getUserNo())
+                .setFullName(String.format("%s %s %s", details.getFirstName(), details.getMiddleName(), details.getLastName()))
+                .setHashedPassword(user.getPassword())
+                .setActionDetails("Created-user-event")
+                .build();
+        userCreatedEventsService.sendUserCreatedEvent(event);
     }
 }

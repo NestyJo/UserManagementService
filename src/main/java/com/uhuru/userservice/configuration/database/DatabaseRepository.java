@@ -1,10 +1,7 @@
 package com.uhuru.userservice.configuration.database;
 
 
-import com.uhuru.userservice.configuration.database.repository.PermissionRepository;
-import com.uhuru.userservice.configuration.database.repository.RoleRepository;
-import com.uhuru.userservice.configuration.database.repository.UserAccessRepository;
-import com.uhuru.userservice.configuration.database.repository.UserDetailsRepository;
+import com.uhuru.userservice.configuration.database.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,13 +12,16 @@ public class DatabaseRepository {
     public final UserAccessRepository userAccessRepository;
     public final UserDetailsRepository userDetailsRepository;
     public final PermissionRepository permissionRepository;
+    public final UserRoleRepository userRoleRepository;
 
     @Autowired
-    public DatabaseRepository(RoleRepository roleRepository, UserAccessRepository userAccessRepository, UserDetailsRepository userDetailsRepository, PermissionRepository permissionRepository) {
+    public DatabaseRepository(RoleRepository roleRepository, UserAccessRepository userAccessRepository, UserDetailsRepository userDetailsRepository, PermissionRepository permissionRepository, UserRoleRepository userRoleRepository) {
         this.roleRepository = roleRepository;
         this.userAccessRepository = userAccessRepository;
         this.userDetailsRepository = userDetailsRepository;
         this.permissionRepository = permissionRepository;
+
+        this.userRoleRepository = userRoleRepository;
     }
 
     public RoleRepository getRoleRepository() {
@@ -38,5 +38,9 @@ public class DatabaseRepository {
 
     public PermissionRepository getPermissionRepository() {
         return permissionRepository;
+    }
+
+    public UserRoleRepository getUserRoleRepository() {
+        return userRoleRepository;
     }
 }
